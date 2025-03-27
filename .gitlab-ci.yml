@@ -1,0 +1,35 @@
+image: amazon/aws-cli:latest
+
+default:
+  tags:
+    - eks
+
+stages:
+  - frontend
+  - backend
+
+before_script:
+  - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPO_URI
+
+# Build and Push Frontend image to ECR
+build_frontend:
+  stage: frontend
+  only:
+    - main
+  script:
+    - cd application_code/frontend
+    - docker build -t $ECR_REPO_URI/$FRONTEND_REPO:$IMAGE_TAG .
+    - docker images
+    - docker push $ECR_REPO_URI/$FRONTEND_REPO:$IMAGE_TAG
+  
+# Build and Push Backend image to ECR
+build_backend:
+  stage: backend
+  only:
+    - main
+  script:
+    - cd application_code/backend
+    - docker build -t $ECR_REPO_URI/$BACKEND_REPO:$IMAGE_TAG .
+    - docker images
+    - docker push $ECR_REPO_URI/$BACKEND_REPO:$IMAGE_TAG
+    - docker image prune -f
