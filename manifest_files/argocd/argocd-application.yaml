@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: url-shortener-app  
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://gitlab.com/gopal163517/url_shortener_project.git
+    targetRevision: main
+    path: manifest_files/app
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true
+    syncOptions:
+      - CreateNamespace=true
