@@ -8,7 +8,7 @@ cache:
 
 before_script:
   - cd terraform_code 
-  - terraform init -reconfigure
+  - terraform init 
 
 stages:
   - validate
@@ -54,6 +54,5 @@ destroy:
   dependencies:
     - apply
   script:
-    - terraform refresh
     - terraform destroy --auto-approve
   when: manual 
