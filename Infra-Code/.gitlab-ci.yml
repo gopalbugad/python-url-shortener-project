@@ -1,0 +1,59 @@
+default:
+  tags:
+    - shell-runner 
+
+cache:
+  paths:
+    - terraform_code/.terraform
+
+before_script:
+  - cd terraform_code 
+  - terraform init -reconfigure
+
+stages:
+  - validate
+  - plan
+  - apply
+  - destroy
+
+validate:
+  stage: validate
+  only:
+    - infra-automate
+  script:
+    - terraform fmt -recursive
+    - terraform validate
+
+plan:
+  stage: plan
+  only:
+    - infra-automate
+  script:
+    - terraform plan -out="planfile"
+  dependencies:
+    - validate
+  artifacts:
+    paths:
+      - terraform_code/planfile
+    expire_in: 1h
+
+apply:
+  stage: apply
+  only:
+    - infra-automate
+  dependencies:
+    - plan
+  script:
+    - ls -l
+    - terraform apply -input=false "planfile"
+
+destroy: 
+  stage: destroy
+  only:
+    - infra-automate
+  dependencies:
+    - apply
+  script:
+    - terraform refresh
+    - terraform destroy --auto-approve
+  when: manual 
